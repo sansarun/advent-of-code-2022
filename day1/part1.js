@@ -3,9 +3,11 @@ const _ = require("lodash");
 const fs = require("fs");
 const input = fs.readFileSync("input.txt", "utf8");
 
-const elves_cal = input
-  .split("\n\n")
-  .map((calsString) => _.sum(calsString.split("\n").map((cal) => Number(cal))));
+const elvesCalories = input.split("\n\n").map(sumCalories);
 
-top_cal = _.max(elves_cal);
-console.log(top_cal);
+function sumCalories(caloriesString) {
+  return _.sum(caloriesString.split("\n").map((cal) => Number(cal)));
+}
+
+topCalories = _.max(elvesCalories);
+console.log(topCalories);
