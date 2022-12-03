@@ -17,7 +17,7 @@ function toNumber(c) {
   else return code - 38;
 }
 
-const duplicates = input.split("\n").map((sack) => findDuplicate(sack));
+const duplicates = input.split("\n").map(findDuplicate);
 const sum = _.sum(duplicates.map(toNumber));
 
 console.log(sum); //7824
