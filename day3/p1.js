@@ -1,23 +1,26 @@
-const _ = require("lodash");
-
 const fs = require("fs");
+const { chunk, uniq, intersection, chain, toArray } = require("lodash");
+
 const input = fs.readFileSync("input.txt", "utf8");
 
+function parseInput(input) {
+  return input.split("\n").map(toArray);
+}
+
 function findDuplicate(sack) {
-  const len = sack.length;
-  const first = sack.substring(0, len / 2).split("");
-  const second = sack.substring(len / 2).split("");
-  const duplicate = _.uniq(first.filter((c) => second.indexOf(c) != -1));
-  return duplicate[0];
+  const [compartment1, compartment2] = chunk(sack, sack.length / 2);
+  return uniq(intersection(compartment1, compartment2))[0];
 }
 
-function toNumber(c) {
-  const code = c.charCodeAt(0);
-  if (code >= 97) return code - 96;
-  else return code - 38;
+function priority(char) {
+  const code = char.charCodeAt(0);
+  return char >= "a" ? code - 96 : code - 38;
 }
 
-const duplicates = input.split("\n").map(findDuplicate);
-const sum = _.sum(duplicates.map(toNumber));
+const sum = chain(parseInput(input))
+  .map(findDuplicate)
+  .map(priority)
+  .sum()
+  .value();
 
 console.log(sum); //7824

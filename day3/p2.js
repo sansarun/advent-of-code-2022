@@ -1,23 +1,22 @@
-const _ = require("lodash");
-
 const fs = require("fs");
+const { chain, toArray, intersection } = require("lodash");
+
 const input = fs.readFileSync("input.txt", "utf8");
 
-function findDuplicate(sacks) {
-  const [first, second, third] = sacks.map((sack) => sack.split(""));
-  const duplicate = _.uniq(
-    first.filter((c) => second.indexOf(c) != -1 && third.indexOf(c) != -1)
-  );
-  return duplicate[0];
+function parseInput(input) {
+  return input.split("\n").map(toArray);
 }
 
-function toNumber(c) {
-  const code = c.charCodeAt(0);
-  if (code >= 97) return code - 96;
-  else return code - 38;
+function priority(char) {
+  const code = char.charCodeAt(0);
+  return char >= "a" ? code - 96 : code - 38;
 }
 
-const duplicates = _.chunk(input.split("\n"), 3).map(findDuplicate);
-const sum = _.sum(duplicates.map(toNumber));
+const sum = chain(parseInput(input))
+  .chunk(3)
+  .map((sackGroup) => intersection(...sackGroup)[0])
+  .map(priority)
+  .sum()
+  .value();
 
 console.log(sum); //2798
