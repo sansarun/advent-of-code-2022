@@ -22,24 +22,24 @@ function dirAndParents(currentDir) {
   }, []);
 }
 
+function isFile(line) {
+  return /\d+/.test(line);
+}
+
 let currentDir = "";
 const dirs = {};
 input.split("\n").forEach((line) => {
   if (line.startsWith("$ cd")) {
     currentDir = changeCurrentDir(currentDir, line);
-  } else if (line.startsWith("$ ls")) {
-    // do nothing
-  } else {
-    if (!line.startsWith("dir ")) {
-      const size = toNumber(line.split(" ")[0]);
-      dirAndParents(currentDir).forEach((dir) => {
-        if (dir in dirs) {
-          dirs[dir] = dirs[dir] + size;
-        } else {
-          dirs[dir] = size;
-        }
-      });
-    }
+  } else if (isFile(line)) {
+    const size = toNumber(line.split(" ")[0]);
+    dirAndParents(currentDir).forEach((dir) => {
+      if (dir in dirs) {
+        dirs[dir] = dirs[dir] + size;
+      } else {
+        dirs[dir] = size;
+      }
+    });
   }
 });
 
