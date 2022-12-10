@@ -4,53 +4,46 @@ const { dropRight, toNumber, take, chain } = require("lodash");
 
 const input = fs.readFileSync("input.txt", "utf8");
 
+function changeCurrentDir(currentDir, cdCommand) {
+  const [, , newDir] = cdCommand.split(" ");
+  if (newDir == "..") {
+    return dropRight(currentDir.split("/"), 1).join("/");
+  } else if (newDir == "/") {
+    return "";
+  } else {
+    return currentDir + "/" + newDir;
+  }
+}
+
+function dirsInHierarchy(currentDir) {
+  return currentDir.split("/").reduce((acc, _, index, array) => {
+    acc.push(take(array, index + 1).join("/"));
+    return acc;
+  }, []);
+}
+
 let currentDir = "";
-
 const dirs = {};
-
 input.split("\n").forEach((line) => {
   if (line.startsWith("$ cd")) {
-    const [, , dir] = line.split(" ");
-    if (dir == "..") {
-      currentDir = dropRight(currentDir.split("/"), 1).join("/");
-      if (currentDir == "") {
-        currentDir = "/";
-      }
-    } else {
-      if (dir == "/") {
-        currentDir = "/";
-      } else if (currentDir == "/") {
-        currentDir = "/" + dir;
-      } else {
-        currentDir = currentDir + "/" + dir;
-      }
-    }
+    currentDir = changeCurrentDir(currentDir, line);
   } else if (line.startsWith("$ ls")) {
+    // do nothing
   } else {
     if (!line.startsWith("dir ")) {
       const size = toNumber(line.split(" ")[0]);
-      var paths = currentDir.split("/");
-      if (paths[0] == "" && paths[1] == "") {
-        paths = [""];
-      }
-
-      for (i = 1; i <= paths.length; i++) {
-        var p = take(paths, i).join("/");
-        if (p == "") {
-          p = "/";
-        }
-
-        if (p in dirs) {
-          dirs[p] = dirs[p] + size;
+      dirsInHierarchy(currentDir).forEach((dir) => {
+        if (dir in dirs) {
+          dirs[dir] = dirs[dir] + size;
         } else {
-          dirs[p] = size;
+          dirs[dir] = size;
         }
-      }
+      });
     }
   }
 });
 
-answer = chain(Object.values(dirs))
+const answer = chain(Object.values(dirs))
   .filter((size) => size < 100000)
   .sum()
   .value();

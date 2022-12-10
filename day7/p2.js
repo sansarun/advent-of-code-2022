@@ -1,69 +1,54 @@
+const { assert } = require("console");
 const fs = require("fs");
 const { dropRight, toNumber, take, chain } = require("lodash");
 
 const input = fs.readFileSync("input.txt", "utf8");
 
+function changeCurrentDir(currentDir, cdCommand) {
+  const [, , newDir] = cdCommand.split(" ");
+  if (newDir == "..") {
+    return dropRight(currentDir.split("/"), 1).join("/");
+  } else if (newDir == "/") {
+    return "";
+  } else {
+    return currentDir + "/" + newDir;
+  }
+}
+
+function dirsInHierarchy(currentDir) {
+  return currentDir.split("/").reduce((acc, _, index, array) => {
+    acc.push(take(array, index + 1).join("/"));
+    return acc;
+  }, []);
+}
+
 let currentDir = "";
-
 const dirs = {};
-
 input.split("\n").forEach((line) => {
   if (line.startsWith("$ cd")) {
-    const [, , dir] = line.split(" ");
-    if (dir == "..") {
-      currentDir = dropRight(currentDir.split("/"), 1).join("/");
-      if (currentDir == "") {
-        currentDir = "/";
-      }
-    } else {
-      if (dir == "/") {
-        currentDir = "/";
-      } else if (currentDir == "/") {
-        currentDir = "/" + dir;
-      } else {
-        currentDir = currentDir + "/" + dir;
-      }
-    }
+    currentDir = changeCurrentDir(currentDir, line);
   } else if (line.startsWith("$ ls")) {
+    // do nothing
   } else {
     if (!line.startsWith("dir ")) {
       const size = toNumber(line.split(" ")[0]);
-      var paths = currentDir.split("/");
-      if (paths[0] == "" && paths[1] == "") {
-        paths = [""];
-      }
-
-      for (i = 1; i <= paths.length; i++) {
-        var p = take(paths, i).join("/");
-        if (p == "") {
-          p = "/";
-        }
-
-        if (p in dirs) {
-          dirs[p] = dirs[p] + size;
+      dirsInHierarchy(currentDir).forEach((dir) => {
+        if (dir in dirs) {
+          dirs[dir] = dirs[dir] + size;
         } else {
-          dirs[p] = size;
+          dirs[dir] = size;
         }
-      }
+      });
     }
   }
 });
 
-console.log(dirs);
+const unused = 70000000 - dirs[""];
+const needed = 30000000 - unused;
+const answer = chain(Object.values(dirs))
+  .filter((size) => size >= needed)
+  .sort((a, b) => a - b)
+  .head()
+  .value();
 
-unused = 70000000 - dirs["/"];
-
-need = 30000000 - unused;
-
-console.log(need);
-
-sizes = Object.values(dirs).sort(function (a, b) {
-  return a - b;
-});
-
-for (i = 0; i < sizes.length; i++) {
-  if (sizes[i] >= need) {
-    console.log(sizes[i]);
-    break;
-  }
-}
+assert(answer == 8679207);
