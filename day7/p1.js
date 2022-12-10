@@ -15,7 +15,7 @@ function changeCurrentDir(currentDir, cdCommand) {
   }
 }
 
-function dirsInHierarchy(currentDir) {
+function dirAndParents(currentDir) {
   return currentDir.split("/").reduce((acc, _, index, array) => {
     acc.push(take(array, index + 1).join("/"));
     return acc;
@@ -24,6 +24,7 @@ function dirsInHierarchy(currentDir) {
 
 let currentDir = "";
 const dirs = {};
+
 input.split("\n").forEach((line) => {
   if (line.startsWith("$ cd")) {
     currentDir = changeCurrentDir(currentDir, line);
@@ -32,7 +33,7 @@ input.split("\n").forEach((line) => {
   } else {
     if (!line.startsWith("dir ")) {
       const size = toNumber(line.split(" ")[0]);
-      dirsInHierarchy(currentDir).forEach((dir) => {
+      dirAndParents(currentDir).forEach((dir) => {
         if (dir in dirs) {
           dirs[dir] = dirs[dir] + size;
         } else {
